@@ -9,36 +9,62 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(cache = TRUE)
-library(data.table)
-library(dplyr)
-library(ggplot2)
-library(scales)
-library(caret)
+if (!require("pacman")) install.packages("pacman")
+p_load(data.table, ggplot2, dplyr, scales, caret, googledrive)
+rm(list = ls()) #clear environment
+# library(data.table)
+# library(dplyr)
+# library(ggplot2)
+# library(scales)
+# library(caret)
+drive_download(file = as_id("https://drive.google.com/open?id=1US_KdR8KtafnVX2lmSAA-kCvzFAk8UPF"),
+  path = "Pubs_Field_COMPLETE.csv",
+  overwrite = TRUE)
 
-setwd("C:/Users/phchen/Desktop/sds480/Interdisciplinary Research Dataset")
+drive_download(file = as_id("https://drive.google.com/open?id=1sTOuKUhi1BajIlNUfflEoaSAyNlUU9ab"),
+  path = "Journal_fields.csv",
+  overwrite = TRUE)
+
+drive_download(file = as_id("https://drive.google.com/open?id=1Xy4g8xJ8RdJg5egF6fQ8e7XPFJ8KzGIM"),
+  path = "Comp_less_COMPLETE.csv",
+  overwrite = TRUE)
+
+#setwd("C:/Users/phchen/Desktop/sds480/Interdisciplinary Research Dataset")
 ```
 
 # Data Analysis
 
 Read in data.
 ```{r read_in, include=FALSE}
-pubs = fread("Pubs_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+pubs = read.csv("Pubs_Field_COMPLETE.csv")
+#pubs = fread("Pubs_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
 fields = c('NS', 'EC', 'GI', 'Other')
 pubs1 = pubs[pubs$Field %in% fields,]
 # fwrite(pubs1, "Pubs_Field_cleaned_COMPLETE.csv")
 pubs1$Journal_CiteScore = as.numeric(pubs1$Journal_CiteScore)
+
+#I don't see this in the Google Drive
 pubs_cited = fread("PubsCited_FieldTarget_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+
 pubs_field = pubs_cited[pubs_cited$Field %in% fields & pubs_cited$Source %in% fields,]
 # fwrite(pubs_field, "PubsCited_Field_cleaned_COMPLETE.csv")
 # comp_pubs = fread("Comp_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
 # comp_pubs = comp_pubs[!(comp_pubs$eid %in% pubs$eid)]
 # fwrite(comp_pubs, "Comp_Field_cleaned_COMPLETE.csv")
 # comp_pubs = fread("Comp_Field_cleaned_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
-comp_pubs = fread("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+
+
+#comp_pubs = fread("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+comp_pubs = read.csv("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+
 comp_pubs1 = comp_pubs[comp_pubs$Field %in% fields,]
 # comp_cited = fread("CompCited_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
 
-scopus_journals = fread("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
+#scopus_journals = fread("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
+scopus_journals = read.csv("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
 scj = scopus_journals[1:39748]
 ```
 
