@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(cache = TRUE)
 if (!require("pacman")) install.packages("pacman")
-p_load(data.table, ggplot2, dplyr, scales, caret, googledrive)
+p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr,tidyr)
 rm(list = ls()) #clear environment
 # library(data.table)
 # library(dplyr)
@@ -29,6 +29,11 @@ drive_download(file = as_id("https://drive.google.com/open?id=1Xy4g8xJ8RdJg5egF6
   path = "Comp_less_COMPLETE.csv",
   overwrite = TRUE)
 
+drive_download(file = as_id("https://drive.google.com/open?id=1gySu5IQbhowWut4RZQH-d9_XAWgeBACE"),
+  path = "PubsCited_FieldTarget_COMPLETE.csv",
+  overwrite = TRUE)
+
+
 #setwd("C:/Users/phchen/Desktop/sds480/Interdisciplinary Research Dataset")
 ```
 
@@ -44,8 +49,8 @@ pubs1 = pubs[pubs$Field %in% fields,]
 pubs1$Journal_CiteScore = as.numeric(pubs1$Journal_CiteScore)
 
 #I don't see this in the Google Drive
-pubs_cited = fread("PubsCited_FieldTarget_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
-
+#pubs_cited = fread("PubsCited_FieldTarget_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+pubs_cited = read.csv("PubsCited_FieldTarget_COMPLETE.csv")
 
 pubs_field = pubs_cited[pubs_cited$Field %in% fields & pubs_cited$Source %in% fields,]
 # fwrite(pubs_field, "PubsCited_Field_cleaned_COMPLETE.csv")
@@ -65,14 +70,14 @@ comp_pubs1 = comp_pubs[comp_pubs$Field %in% fields,]
 
 #scopus_journals = fread("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
 scopus_journals = read.csv("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
-scj = scopus_journals[1:39748]
+scj = scopus_journals[1:39748,] #not sure what this doing, but I think you need a comma. 
 ```
 
 ##  Normalize citation counts by mean and standard deviation of journal issue
 Mean and sd by journal issue
 ```{r}
-keep = c("eid", "publication_name", "volume", "issue", "citation_count", "Field", "Quartile")
-normed = rbind(comp_pubs[,..keep], pubs[,..keep])
+keep <- c("eid", "publication_name", "volume", "issue", "citation_count", "Field", "Quartile")
+normed <- rbind(comp_pubs[,keep], pubs[,keep])
 normed$journ = paste(normed$publication_name, normed$volume, normed$issue, sep = " | ")
 normed %>%
   group_by(journ) %>%
@@ -96,7 +101,11 @@ Mean interdisciplinary citation count on average is 1.06636 standard deviations 
 #   group_by(journ) %>%
 #   summarise(mean = mean(citation_count), sd = sd(citation_count)), "normed.csv")
 # fwrite(data.table(pubs, paste(pubs$publication_name, pubs$volume, pubs$issue, sep = " | ")), "normed_pubs.csv")
-normed = fread("normed_pubs_cleaned.csv", encoding = "UTF-8", stringsAsFactors = F)
+drive_download(file = as_id("https://drive.google.com/open?id=1wlQbWBMa4ntewQcyIXe-TL3egVzOHdfL"),
+  path = "normed_pubs_cleaned.csv",
+  overwrite = TRUE)
+
+normed = read.csv("normed_pubs_cleaned.csv", encoding = "UTF-8", stringsAsFactors = F)
 print("Quartiles for complete interdiscplinary dataset \n")
 print(summary(normed$std))
 print("Quartiles for interdiscplinary dataset, less journal names that couldn't be mapped to field \n")
@@ -122,6 +131,21 @@ ggplot(normed, aes(x = std)) +
   geom_histogram(bins = 100, color="#003B46", fill="#C4DFE6") +
   labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
   geom_vline(aes(xintercept = mean(std)), color="blue", linetype="dashed", size=1)
+
+tmp.data <- normed%>%
+  filter(std > 10)
+#what is std exactly?
+gghistogram(data = normed, x = "std",
+            binwidth = 1,
+            color = "blue",
+            xlab = "standard deviation")
+
+#I think this is better metric. 
+gghistogram(data = normed, x = "z.mean",
+            binwidth = 5,
+            color = "blue", fill = "blue",
+            xlab = "z mean")
+
 ```
 
 Histogram split by field of publication.
@@ -134,11 +158,29 @@ means = normed %>%
   mutate(percentage = percent(num_articles/sum(num_articles)))
 print(means)
 
+
+z.means = normed %>%
+  group_by(Field) %>%
+  summarise(mean = mean(z.mean), num_articles = n()) %>% 
+  mutate(percentage = percent(num_articles/sum(num_articles)))
+print(z.means)
+
 ggplot(normed, aes(x = std, color=Field)) + 
   geom_histogram(bins = 200, fill="white", position="dodge") +
   labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
   geom_vline(data = means, aes(xintercept = mean, color=Field), linetype="dashed", size=1) +
   scale_color_brewer(palette="RdYlGn")
+
+
+gghistogram(data = normed, x = "z.mean",
+            binwidth = 5,
+            color = "Field", fill = "Field",
+            xlab = "z mean")
+
+gghistogram(data = normed, x = "std",
+            binwidth = 5,
+            color = "Field", fill = "Field",
+            xlab = "z mean")
 
 ggplot(normed, aes(x = std+1, color=Field)) + 
   geom_histogram(bins = 200, fill="white", position="dodge") +
