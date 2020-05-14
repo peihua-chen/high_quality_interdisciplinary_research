@@ -127,18 +127,35 @@ print(summary(normed[normed$Field %in% fields,]$std))
 ### Histogram normalized data
 
 ```{r}
+#z.mean is the average citation count. 
+#std is the standardize z-transform. 
 ggplot(normed, aes(x = std)) + 
   geom_histogram(bins = 100, color="#003B46", fill="#C4DFE6") +
   labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
   geom_vline(aes(xintercept = mean(std)), color="blue", linetype="dashed", size=1)
 
 tmp.data <- normed%>%
-  filter(std > 10)
+  filter(std < 20) %>%
+  filter(Quartile == "Quartile 1")
 #what is std exactly?
-gghistogram(data = normed, x = "std",
-            binwidth = 1,
-            color = "blue",
-            xlab = "standard deviation")
+gghistogram(data = tmp.data, x = "std",
+            binwidth = 0.5,
+            fill = "blue",
+            xlab = "standard deviation",
+            add = "mean")
+
+mean(normed$std)
+median(normed$std)
+
+unique(normed$std)[which.max(tabulate(match(normed$std, unique(normed$std))))]
+unique(normed$std)[349:355]
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+getmode(normed$std)
+
 
 #I think this is better metric. 
 gghistogram(data = normed, x = "z.mean",
