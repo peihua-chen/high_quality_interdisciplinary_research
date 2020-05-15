@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(cache = TRUE)
 if (!require("pacman")) install.packages("pacman")
-p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr,tidyr)
+p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr,tidyr, cowplot)
 rm(list = ls()) #clear environment
 # library(data.table)
 # library(dplyr)
@@ -135,14 +135,16 @@ ggplot(normed, aes(x = std)) +
   geom_vline(aes(xintercept = mean(std)), color="blue", linetype="dashed", size=1)
 
 tmp.data <- normed%>%
-  filter(std < 20) %>%
-  filter(Quartile == "Quartile 1")
+  mutate(std.pile = ifelse(std > 10, 10, std))
+  #filter(Quartile == "Quartile 1")
 #what is std exactly?
-gghistogram(data = tmp.data, x = "std",
+gghistogram(data = tmp.data, x = "std.pile",
             binwidth = 0.5,
             fill = "blue",
-            xlab = "standard deviation",
-            add = "mean")
+            xlab = "Z-tranform of Citations"
+            #add = "mean"
+            ) 
+  #+xscale("log2", .format = TRUE)
 
 mean(normed$std)
 median(normed$std)
@@ -157,17 +159,69 @@ getmode <- function(v) {
 getmode(normed$std)
 
 
-#I think this is better metric. 
-gghistogram(data = normed, x = "z.mean",
-            binwidth = 5,
-            color = "blue", fill = "blue",
-            xlab = "z mean")
 
 ```
 
 Histogram split by field of publication.
 48 journal names couldn't be mapped to a field due to Scopus inconsistencies. Removed.
 ```{r}
+
+tmp.data <- normed%>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field != "Other")
+  #filter(Quartile == "Quartile 1")
+#what is std exactly?
+gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "Field", fill = "Field",
+            xlab = "Z-tranform of Citations",
+            add = "mean"
+            ) #+
+ #yscale("log2", .format = TRUE)
+
+
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "NS")
+ns.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "blue", fill = "blue",
+            xlab = "Z-tranform of Citations, Natural Science"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "GI")
+gi.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "blue", fill = "blue",
+            xlab = "Z-tranform of Citations, General Interest"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "EC")
+ec.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "blue", fill = "blue",
+            xlab = "Z-tranform of Citations, Economics"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "Other")
+o.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "blue", fill = "blue",
+            xlab = "Z-tranform of Citations, Other"
+           # add = "mean"
+            )
+
+plot_grid(ns.hist, gi.hist, ec.hist, o.hist)
+
+
+#####
+#not sure we need this. 
 normed = normed[normed$Field %in% fields,]
 means = normed %>%
   group_by(Field) %>%
