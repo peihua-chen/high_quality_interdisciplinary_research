@@ -182,37 +182,45 @@ gghistogram(data = tmp.data, x = "std.pile",
 
 tmp.data <- normed %>%
   mutate(std.pile = ifelse(std > 10, 10, std)) %>%
-  filter(Field == "NS")
+  filter(Field == "NS") %>%
+  filter(Quartile != "Missing")
 ns.hist <- gghistogram(data = tmp.data, x = "std.pile",
             binwidth = 0.5,
-            color = "blue", fill = "blue",
+            #color = "blue", 
+            fill = "Quartile",
             xlab = "Z-tranform of Citations, Natural Science"
            # add = "mean"
             )
 tmp.data <- normed %>%
   mutate(std.pile = ifelse(std > 10, 10, std)) %>%
-  filter(Field == "GI")
+  filter(Field == "GI")%>%
+  filter(Quartile != "Missing")
 gi.hist <- gghistogram(data = tmp.data, x = "std.pile",
             binwidth = 0.5,
-            color = "blue", fill = "blue",
+            #color = "blue", 
+            fill = "Quartile",
             xlab = "Z-tranform of Citations, General Interest"
            # add = "mean"
             )
 tmp.data <- normed %>%
   mutate(std.pile = ifelse(std > 10, 10, std)) %>%
-  filter(Field == "EC")
+  filter(Field == "EC")%>%
+  filter(Quartile != "Missing")
 ec.hist <- gghistogram(data = tmp.data, x = "std.pile",
             binwidth = 0.5,
-            color = "blue", fill = "blue",
+            #color = "blue", 
+            fill = "Quartile",
             xlab = "Z-tranform of Citations, Economics"
            # add = "mean"
             )
 tmp.data <- normed %>%
   mutate(std.pile = ifelse(std > 10, 10, std)) %>%
-  filter(Field == "Other")
+  filter(Field == "Other")%>%
+  filter(Quartile != "Missing")
 o.hist <- gghistogram(data = tmp.data, x = "std.pile",
             binwidth = 0.5,
-            color = "blue", fill = "blue",
+            #color = "blue", 
+            fill = "Quartile",
             xlab = "Z-tranform of Citations, Other"
            # add = "mean"
             )
