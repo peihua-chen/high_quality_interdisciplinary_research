@@ -78,7 +78,7 @@ Mean and sd by journal issue
 ```{r}
 keep <- c("eid", "publication_name", "volume", "issue", "citation_count", "Field", "Quartile")
 normed <- rbind(comp_pubs[,keep], pubs[,keep])
-normed$journ = paste(normed$publication_name, normed$volume, normed$issue, sep = " | ")
+normed$journ = paste(tolower(normed$publication_name), normed$volume, normed$issue, sep = " | ")
 normed %>%
   group_by(journ) %>%
   summarise(mean = mean(citation_count), sd = sd(citation_count))
@@ -101,11 +101,17 @@ Mean interdisciplinary citation count on average is 1.06636 standard deviations 
 #   group_by(journ) %>%
 #   summarise(mean = mean(citation_count), sd = sd(citation_count)), "normed.csv")
 # fwrite(data.table(pubs, paste(pubs$publication_name, pubs$volume, pubs$issue, sep = " | ")), "normed_pubs.csv")
-drive_download(file = as_id("https://drive.google.com/open?id=1wlQbWBMa4ntewQcyIXe-TL3egVzOHdfL"),
-  path = "normed_pubs_cleaned.csv",
-  overwrite = TRUE)
+# drive_download(file = as_id("https://drive.google.com/open?id=1wlQbWBMa4ntewQcyIXe-TL3egVzOHdfL"),
+#   path = "normed_pubs_cleaned.csv",
+#   overwrite = TRUE)
+# 
+# normed = read.csv("normed_pubs_cleaned.csv", encoding = "UTF-8", stringsAsFactors = F)
+normed = normed %>%
+  group_by(journ) %>%
+  mutate(z.mean = mean(citation_count), z.sd = sd(citation_count), std = scale(citation_count))
+normed$std = ifelse(is.na(tmp.normed$std), tmp.normed$citation_count, tmp.normed$std)
+normed = normed[normed$eid %in% pubs$eid,]
 
-normed = read.csv("normed_pubs_cleaned.csv", encoding = "UTF-8", stringsAsFactors = F)
 print("Quartiles for complete interdiscplinary dataset \n")
 print(summary(normed$std))
 print("Quartiles for interdiscplinary dataset, less journal names that couldn't be mapped to field \n")
