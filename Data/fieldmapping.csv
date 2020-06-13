@@ -1,0 +1,29 @@
+﻿Abbrev,Field,Mapping
+AGRI,Agricultural and Biological Sciences,NS
+ARTS,Arts and Humanities,Other
+BIOC,"Biochemistry, Genetics and Molecular Biology",NS
+BUSI,"Business, Management and Accounting",EC
+CENG,Chemical Engineering,NS
+CHEM,Chemistry,NS
+COMP,Computer Science,Other
+DECI,Decision Sciences,Other
+DENT,Dentistry,Other
+EART,Earth and Planetary Sciences,NS
+ECON,"Economics, Econometrics and Finance",EC
+ENER,Energy,NS
+ENGI,Engineering,NS
+ENVI,Environmental Science,NS
+HEAL,Health Professions,NS
+IMMU,Immunology and Microbiology,NS
+MATE,Materials Science,NS
+MATH,Mathematics,Other
+MEDI,Medicine,NS
+NEUR,Neuroscience,NS
+NURS,Nursing,NS
+PHAR,"Pharmacology, Toxicology and Pharmaceutics",NS
+PHYS,Physics and Astronomy,NS
+PSYC,Psychology,Other
+SOCI,Social Sciences,Other
+VETE,Veterinary,NS
+MULT,Multidisciplinary,Other
+,Natural Science,NS

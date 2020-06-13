@@ -1,0 +1,493 @@
+---
+title: "data analysis"
+author: "Pei Hua Chen"
+date: "3/31/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+if (!require("pacman")) install.packages("pacman")
+p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr, tidyr, cowplot)
+rm(list = ls()) #clear environment
+
+drive_download(file = as_id("https://drive.google.com/open?id=1US_KdR8KtafnVX2lmSAA-kCvzFAk8UPF"),
+  path = "Pubs_Field_COMPLETE.csv",
+  overwrite = TRUE)
+
+drive_download(file = as_id("https://drive.google.com/open?id=1sTOuKUhi1BajIlNUfflEoaSAyNlUU9ab"),
+  path = "Journal_fields.csv",
+  overwrite = TRUE)
+
+drive_download(file = as_id("https://drive.google.com/open?id=1Xy4g8xJ8RdJg5egF6fQ8e7XPFJ8KzGIM"),
+  path = "Comp_less_COMPLETE.csv",
+  overwrite = TRUE)
+
+drive_download(file = as_id("https://drive.google.com/open?id=1gySu5IQbhowWut4RZQH-d9_XAWgeBACE"),
+  path = "PubsCited_FieldTarget_COMPLETE.csv",
+  overwrite = TRUE)
+```
+
+# Data Analysis
+
+Read in data.
+```{r read_in, include=FALSE}
+pubs = read.csv("Pubs_Field_COMPLETE.csv")
+#pubs = fread("Pubs_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+fields = c('NS', 'EC', 'GI', 'Other')
+pubs1 = pubs[pubs$Field %in% fields,]
+# fwrite(pubs1, "Pubs_Field_cleaned_COMPLETE.csv")
+pubs1$Journal_CiteScore = as.numeric(pubs1$Journal_CiteScore)
+
+#I don't see this in the Google Drive
+#pubs_cited = fread("PubsCited_FieldTarget_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+pubs_cited = read.csv("PubsCited_FieldTarget_COMPLETE.csv")
+
+pubs_field = pubs_cited[pubs_cited$Field %in% fields & pubs_cited$Source %in% fields,]
+# fwrite(pubs_field, "PubsCited_Field_cleaned_COMPLETE.csv")
+# comp_pubs = fread("Comp_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+# comp_pubs = comp_pubs[!(comp_pubs$eid %in% pubs$eid)]
+# fwrite(comp_pubs, "Comp_Field_cleaned_COMPLETE.csv")
+# comp_pubs = fread("Comp_Field_cleaned_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+
+
+#comp_pubs = fread("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+comp_pubs = read.csv("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+
+comp_pubs1 = comp_pubs[comp_pubs$Field %in% fields,]
+# comp_cited = fread("CompCited_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
+
+#scopus_journals = fread("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
+scopus_journals = read.csv("Journal_fields.csv", encoding = "UTF-8", stringsAsFactors = F)
+scj = scopus_journals[1:39748,] #not sure what this doing, but I think you need a comma. 
+```
+
+##  Normalize citation counts by mean and standard deviation of journal issue
+Mean and sd by journal issue
+```{r}
+keep <- c("eid", "publication_name", "volume", "issue", "citation_count", "Field", "Quartile")
+normed <- rbind(comp_pubs[,keep], pubs[,keep])
+normed$journ = paste(tolower(normed$publication_name), normed$volume, normed$issue, sep = " | ")
+normed %>%
+  group_by(journ) %>%
+  summarise(mean = mean(citation_count), sd = sd(citation_count))
+```
+
+```{r, include=FALSE}
+# library(plyr)
+# comp_norm = ddply(
+#   rbind(comp_pubs[, c("eid", "publication_name", "volume", "issue", "citation_count")], 
+#         pubs[, c("eid", "publication_name", "volume", "issue", "citation_count")]),
+#   c("publication_name", "volume", "issue"), transform, std = scale(citation_count))
+# detach(package:plyr)
+# comp_norm = comp_norm[comp_norm$eid %in% pubs$eid,]
+# summary(comp_norm$std)
+```
+
+Mean interdisciplinary citation count on average is 1.06636 standard deviations above comparator set, outside 85% CI.
+```{r, include=FALSE}
+# fwrite(normed %>%
+#   group_by(journ) %>%
+#   summarise(mean = mean(citation_count), sd = sd(citation_count)), "normed.csv")
+# fwrite(data.table(pubs, paste(pubs$publication_name, pubs$volume, pubs$issue, sep = " | ")), "normed_pubs.csv")
+# drive_download(file = as_id("https://drive.google.com/open?id=1wlQbWBMa4ntewQcyIXe-TL3egVzOHdfL"),
+#   path = "normed_pubs_cleaned.csv",
+#   overwrite = TRUE)
+# 
+# normed = read.csv("normed_pubs_cleaned.csv", encoding = "UTF-8", stringsAsFactors = F)
+normed = normed %>%
+  group_by(journ) %>%
+  mutate(z.mean = mean(citation_count), z.sd = sd(citation_count), std = scale(citation_count))
+normed$std = ifelse(is.na(tmp.normed$std), tmp.normed$citation_count, tmp.normed$std)
+normed = normed[normed$eid %in% pubs$eid,]
+
+print("Quartiles for complete interdiscplinary dataset \n")
+print(summary(normed$std))
+print("Quartiles for interdiscplinary dataset, less journal names that couldn't be mapped to field \n")
+print(summary(normed[normed$Field %in% fields,]$std))
+```
+
+```{r, include=FALSE}
+# normed = data.table(normed, key = "journ")
+# normed[, mean := mean(citation_count), "journ"]
+# normed[, sd := sd(citation_count), "journ"]
+# normed[, std := (citation_count - mean(citation_count, na.rm = TRUE)) /  
+#          sd(citation_count, na.rm = TRUE), "journ"]
+# normed = normed[normed$eid %in% pubs1$eid]
+# normed$std = ifelse(is.na(normed$std), normed$citation_count, normed$std)
+# summary(normed$std)
+```
+
+
+### Histogram normalized data
+
+```{r}
+#z.mean is the average citation count. 
+#std is the standardize z-transform. 
+ggplot(normed, aes(x = std)) + 
+  geom_histogram(bins = 100, color="#003B46", fill="#C4DFE6") +
+  labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
+  geom_vline(aes(xintercept = mean(std)), color="blue", linetype="dashed", size=1)
+
+tmp.data <- normed%>%
+  mutate(std.pile = ifelse(std > 10, 10, std))
+  #filter(Quartile == "Quartile 1")
+#what is std exactly?
+gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            fill = "blue",
+            xlab = "Z-tranform of Citations"
+            #add = "mean"
+            ) 
+  #+xscale("log2", .format = TRUE)
+
+mean(normed$std)
+median(normed$std)
+
+unique(normed$std)[which.max(tabulate(match(normed$std, unique(normed$std))))]
+unique(normed$std)[349:355]
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+getmode(normed$std)
+
+
+
+```
+
+Histogram split by field of publication.
+48 journal names couldn't be mapped to a field due to Scopus inconsistencies. Removed.
+```{r}
+
+tmp.data <- normed%>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field != "Other")
+  #filter(Quartile == "Quartile 1")
+#what is std exactly?
+gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            color = "Field", fill = "Field",
+            xlab = "Z-tranform of Citations",
+            add = "mean"
+            ) #+
+ #yscale("log2", .format = TRUE)
+
+
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "NS") %>%
+  filter(Quartile != "Missing")
+ns.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            #color = "blue", 
+            fill = "Quartile",
+            xlab = "Z-tranform of Citations, Natural Science"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "GI")%>%
+  filter(Quartile != "Missing")
+gi.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            #color = "blue", 
+            fill = "Quartile",
+            xlab = "Z-tranform of Citations, General Interest"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "EC")%>%
+  filter(Quartile != "Missing")
+ec.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            #color = "blue", 
+            fill = "Quartile",
+            xlab = "Z-tranform of Citations, Economics"
+           # add = "mean"
+            )
+tmp.data <- normed %>%
+  mutate(std.pile = ifelse(std > 10, 10, std)) %>%
+  filter(Field == "Other")%>%
+  filter(Quartile != "Missing")
+o.hist <- gghistogram(data = tmp.data, x = "std.pile",
+            binwidth = 0.5,
+            #color = "blue", 
+            fill = "Quartile",
+            xlab = "Z-tranform of Citations, Other"
+           # add = "mean"
+            )
+
+plot_grid(ns.hist, gi.hist, ec.hist, o.hist)
+
+
+#####
+#not sure we need this. 
+normed = normed[normed$Field %in% fields,]
+means = normed %>%
+  group_by(Field) %>%
+  summarise(mean = mean(std), num_articles = n()) %>% 
+  mutate(percentage = percent(num_articles/sum(num_articles)))
+print(means)
+
+
+z.means = normed %>%
+  group_by(Field) %>%
+  summarise(mean = mean(z.mean), num_articles = n()) %>% 
+  mutate(percentage = percent(num_articles/sum(num_articles)))
+print(z.means)
+
+ggplot(normed, aes(x = std, color=Field)) + 
+  geom_histogram(bins = 200, fill="white", position="dodge") +
+  labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
+  geom_vline(data = means, aes(xintercept = mean, color=Field), linetype="dashed", size=1) +
+  scale_color_brewer(palette="RdYlGn")
+
+
+gghistogram(data = normed, x = "z.mean",
+            binwidth = 5,
+            color = "Field", fill = "Field",
+            xlab = "z mean")
+
+gghistogram(data = normed, x = "std",
+            binwidth = 5,
+            color = "Field", fill = "Field",
+            xlab = "z mean")
+
+ggplot(normed, aes(x = std+1, color=Field)) + 
+  geom_histogram(bins = 200, fill="white", position="dodge") +
+  labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized, log+1 scale)", y = "Count") +
+  scale_x_log10() +
+  geom_vline(data = means, aes(xintercept = mean, color=Field), linetype="dashed", size=1) +
+  scale_color_brewer(palette="RdYlGn")
+```
+
+Histogram split by field with only top quartile of each field.
+Missing 134 quartile values.
+Note that:
+1. Over 80% of articles in the interdisciplinary set are published in top quartile journals in their fields. 
+2. Over 83% of articles published in journals in the top quartile of their field are NS -- but this 83% corresponds to NS articles being 84% of the interdisciplinary set overall.
+```{r}
+normed %>%
+  group_by(Quartile) %>% 
+  summarise(num_articles = n()) %>% 
+  mutate(percentage = percent(num_articles/sum(num_articles)))
+
+means = normed %>%
+  group_by(Quartile, Field) %>% 
+  summarise(mean = mean(std), num_articles = n()) %>%
+  mutate(percentage = percent(num_articles/sum(num_articles)))
+print(means)
+means = means[means$Quartile == "Quartile 1",]
+
+ggplot(normed[normed$Quartile == "Quartile 1"], aes(x = std, color=Field)) + 
+  geom_histogram(bins = 200, fill="white", position="dodge") +
+  labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized)", y = "Count") +
+  geom_vline(data = means, aes(xintercept = mean, color=Field), linetype="dashed", size=1) +
+  scale_color_brewer(palette="RdYlGn")
+
+ggplot(normed[normed$Quartile == "Quartile 1"], aes(x = std+1, color=Field)) + 
+  geom_histogram(bins = 200, fill="white", position="dodge") +
+  labs(title="Interdisciplinary Dataset: Normalized Article Citation Counts", x ="# Citations (Normalized, log+1 scale)", y = "Count") +
+  scale_x_log10() +
+  geom_vline(data = means, aes(xintercept = mean, color=Field), linetype="dashed", size=1) +
+  scale_color_brewer(palette="RdYlGn")
+```
+
+
+
+## t-test means
+
+t-test mean # of citations from interdisciplinary and comparator datasets.
+```{r}
+xP = pubs$citation_count
+xC = comp_pubs$citation_count
+t.test(xP, xC, alternative = "greater")
+```
+
+
+## Summary Statistics and Histogram
+
+
+### Interdisciplinary Dataset
+
+Summary statistics and histogram of interdisciplinary dataset citation counts.
+```{r}
+summary(pubs$citation_count)
+sd(pubs$citation_count)
+
+ggplot(pubs, aes(x = citation_count)) + 
+  geom_histogram(bins = 100, color="#003B46", fill="#C4DFE6") +
+  scale_x_continuous(breaks = seq(0, 2705, by = 250)) +
+  labs(title="Interdisciplinary Dataset: Article Citation Counts", x ="# Citations", y = "Count") +
+  geom_vline(aes(xintercept = mean(citation_count)), color="blue", linetype="dashed", size=1)
+
+ggplot(pubs, aes(x = citation_count + 1)) + 
+  geom_histogram(bins = 50, color="#003B46", fill="#C4DFE6") +
+  scale_x_log10() +
+  labs(title="Interdisciplinary Dataset: Article Citation Counts", x ="# Citations (log + 1 scale)", y = "Count") +
+  geom_vline(aes(xintercept = mean(citation_count)), color="blue", linetype="dashed", size=1)
+
+ggplot(pubs1, aes(x = Journal_CiteScore)) + 
+  geom_histogram(bins = 50, color="#003B46", fill="#C4DFE6") +
+  labs(title="Interdisciplinary Dataset: Journal CiteScore", x ="Scopus CiteScore", y = "Count") +
+  geom_vline(aes(xintercept = mean(Journal_CiteScore)), color="blue", linetype="dashed", size=1)
+```
+
+```{r}
+cat("Mean 2018 CiteScore for interdisciplinary set: ", mean(pubs1$Journal_CiteScore), "\n")
+cat("SD of 2018 CiteScore for interdisciplinary set: ", sd(pubs1$Journal_CiteScore), "\n")
+cat("Mean 2018 CiteScore for all Scopus covered journals: ", mean(scj$CiteScore[1:39748], na.rm=TRUE), "\n")
+cat("SD of 2018 CiteScore for interdisciplinary set: ", sd(scj$CiteScore[1:39748], na.rm=TRUE))
+scj %>% group_by(Field) %>% summarise(mean = mean(CiteScore, na.rm=T), sd = sd(CiteScore, na.rm=T))
+```
+For reference, CiteScore of Nature is 15.21, PNAS is 8.58, Science is 15.21.
+
+### Interdisciplinary Dataset
+
+Summary statistics of comparator dataset citation counts.
+```{r}
+summary(comp_pubs$citation_count)
+sd(comp_pubs$citation_count)
+
+ggplot(comp_pubs, aes(x = citation_count)) + 
+  geom_histogram(bins = 100, color="#003B46", fill="#C4DFE6") +
+  scale_x_continuous(breaks = seq(0, 9130, by = 1000)) +
+  labs(title="Comparator Dataset: Article Citation Counts", x ="# Citations", y = "Count") +
+  geom_vline(aes(xintercept = mean(citation_count)), color="blue", linetype="dashed", size=1)
+
+ggplot(comp_pubs, aes(x = citation_count + 1)) + 
+  geom_histogram(bins = 50, color="#003B46", fill="#C4DFE6") +
+  scale_x_log10() +
+  labs(title="Comparator Dataset: Article Citation Counts", x ="# Citations (log + 1 scale)", y = "Count") +
+  geom_vline(aes(xintercept = mean(citation_count)), color="blue", linetype="dashed", size=1)
+```
+
+### Compare citation counts
+
+Compare citation counts from 90% to 100% quantile at 1% intervals: besides the max value, the interdisciplinary set citation counts exceed comparator set at each step.
+```{r}
+print("Interdiscplinary")
+print(quantile(pubs$citation_count, seq(0.9,1,0.01)))
+print("Comparator")
+print(quantile(comp_pubs$citation_count, seq(0.9,1,0.01)))
+```
+
+Overlay histograms, only use random sample of 3409 rows from comparator.
+```{r}
+hist = rbind(pubs[,c("citation_count", "Dataset")], comp_pubs[,c("citation_count", "Dataset")][sample(.N, nrow(comp_pubs) / 50)])
+ggplot(hist, aes(x = citation_count + 1, color = Dataset)) + 
+  geom_histogram(bins = 200, fill="white", position="dodge") +
+  scale_color_brewer(palette="Paired") + theme_classic() +
+  scale_x_log10() +
+  labs(title="Interdisciplinary and Comparator Datasets: Article Citation Counts", x ="# Citations + 1 (log scale)", y = "Count") +
+  geom_vline(aes(xintercept = 4.292349), color="#1F78B4", linetype="dashed", size=1) +
+  geom_vline(aes(xintercept = 1.520752), color="#A6CEE3", linetype="dashed", size=1) +
+  theme(legend.position="top")
+```
+
+Overlay top 10% of citation counts, only use random sample of 350 rows from comparator (226 interdisciplinary).
+```{r}
+hist = rbind(pubs[pubs$citation_count > 111][,c("citation_count", "Dataset")],
+             comp_pubs[comp_pubs$citation_count > 49][,c("citation_count", "Dataset")][sample(.N, 350)])
+ggplot(hist, aes(x = citation_count + 1, color = Dataset)) + 
+  geom_histogram(bins = 100, fill="white", position="dodge") +
+  scale_color_brewer(palette="Paired") + theme_classic() +
+  scale_x_log10() +
+  labs(title="Interdisciplinary and Comparator Datasets: Article Citation Counts", x ="# Citations + 1 (log scale)", y = "Count") +
+  theme(legend.position="top")
+```
+
+
+
+## Citations in depth: Intra- and Cross-Disciplinary
+
+Source types
+```{r}
+pubs1 %>% group_by(Field) %>% 
+  summarise(count = n()) %>%
+  mutate(percent = percent(count/sum(count)))
+```
+
+Total and average citation by field
+```{r}
+pubs1 %>% group_by(Field) %>%
+  summarise(avg_CiteScore = mean(Journal_CiteScore), total_citations = sum(citation_count), mean = mean(citation_count))
+```
+
+Count and percentage of cited-by articles by type
+```{r}
+pubs_field %>% group_by(Field, CrossIntra) %>%
+  summarise(count = n()) %>% 
+  mutate(percent = percent(count/nrow(pubs_field)))
+```
+
+Count and percentage of cited-by articles by field
+```{r}
+pubs_field %>% group_by(Field, Source) %>%
+  summarize(count = n()) %>%
+  mutate(percentage = percent(count/sum(count)))
+```
+
+Count cross-/intra-disciplinary citations per award.
+```{r}
+peraward = pubs_field %>% group_by(award_id, Source, CrossIntra) %>%  
+  summarize(percentage = n()) %>%
+  mutate(percentage = percentage/sum(percentage))
+for (source in c("EC", "GI", "NS", "Other")) {
+  for (type in c("Cross", "Intra")) {
+    cat(source, type,
+        percent(mean(peraward[peraward$Source == source & peraward$CrossIntra == type,]$percentage)),
+        "\n")
+  }
+}
+```
+
+Plots
+```{r}
+keep = c('citation_count', 'Dataset', 'Journal_CiteScore', 'Field')
+lmdata = rbind(pubs1[, ..keep], comp_pubs1[, ..keep])
+plot(citation_count ~ Journal_CiteScore, data = lmdata)
+ggplot(lmdata, aes(x = Dataset, y = citation_count, fill = Dataset)) + 
+  geom_boxplot() + facet_wrap(~ Field, ncol = 5) + theme(legend.position="top")
+```
+
+Linear regression model: predict citation count by interdiscplinary/not, field of journal of publication, and journal CiteScore.
+Result: weak $R^2$
+Removed 1 outlier (citation count > 5000).
+```{r}
+model = lm(citation_count ~ ., data = lmdata[lmdata$citation_count < 5000])
+model$coefficients
+cat("\n")
+summary(model)
+cat("\n")
+```
+
+
+```{r}
+set.seed(42)
+train.control = trainControl(method = "repeatedcv", number = 10, repeats = 3)
+model = train(citation_count ~., data = lmdata[lmdata$citation_count < 5000], method = "lm",
+               trControl = train.control)
+print(model)
+summary(model)
+```
+
+Trees/Forests
+
+
+
+# Missing Entries
+
+872 (28%) entries in interdisciplinary dataset missing. 93 due to char encoding errors, 779 from 463 unique journals not covered by Scopus.
+```{r}
+error = fread("final_scraped_errors.csv", encoding = "UTF-8")
+unique(error[error_info == "Result set was empty"]$Journal)
+```
+
