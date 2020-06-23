@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(cache = TRUE)
 if (!require("pacman")) install.packages("pacman")
-p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr,tidyr, cowplot)
+p_load(data.table, ggplot2, dplyr, scales, caret, googledrive, ggpubr, tidyr, cowplot, vroom)
 rm(list = ls()) #clear environment
 # library(data.table)
 # library(dplyr)
@@ -63,7 +63,7 @@ pubs_field = pubs_cited[pubs_cited$Field %in% fields & pubs_cited$Source %in% fi
 
 #comp_pubs = fread("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
 comp_pubs = read.csv("Comp_less_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
-
+comp_pubs <- vroom("Comp_less_COMPLETE.csv")  #this loads a lot faster
 
 comp_pubs1 = comp_pubs[comp_pubs$Field %in% fields,]
 # comp_cited = fread("CompCited_Field_COMPLETE.csv", encoding = "UTF-8", stringsAsFactors = F)
