@@ -6,7 +6,7 @@ This repository contains all the data and code necessary to reproduce the data a
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine.
 
 
 ### Prerequisites
@@ -24,6 +24,7 @@ You may want to run the lines in the main function of pullScopus.py one by one i
 
 You can run Data_Analysis.ipynb in Jupyter Notebook with the files called from Google Drive, or you can re-pull all the files.
 
+Note that this project was developed on Windows 10, so the "\\" characters in file paths may need to be changed to "/" for other Linux/Mac.
 
 ## Authors
 

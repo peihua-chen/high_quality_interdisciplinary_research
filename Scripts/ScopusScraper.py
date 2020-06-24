@@ -9,8 +9,8 @@ Purpose: This script provides functions for parsing citations and querying
     quartile mappings.
 '''
 
-import pandas as pd, requests
-from collections import Counter
+import pandas as pd, requests, csv
+from collections import Counter, defaultdict
 
 # Parse Scopus output into pandas dataframe
 def _parse_article(entry):
@@ -156,40 +156,36 @@ def search(key, query):
         return x[0], x[1]
     
 '''
-Quartile and CiteScore mapping
-From a Scopus source list, we get the Scopus within-field journal quartiles.
+Quartile, Field, and CiteScore mapping
+From Scopus source list (https://www.scopus.com/sources), we get the Scopus 
+within-field journal quartiles. We map the ASJC Code to EC, GI, NS, or 
+Other using a predetermined mapping. and choose field by heuristic described 
+in the paper.
 '''
-citescore = pd.read_csv('..\\Data\\..\\Data\\ScopusJournals__CiteScore_Metrics_2011-2018_download.csv',
-                    header=1, encoding='utf8', dtype=str)
-quartile = dict(zip(citescore.Title.str.lower(), citescore.Quartile))
-citescore = dict(zip(citescore.Title.str.lower(), citescore.CiteScore))
+d = pd.read_csv('..\\Data\\fieldmapping.csv')[['ASJC_Code','Mapping']].set_index('ASJC_Code').to_dict()['Mapping']
+scj = pd.read_csv("..\\Data\\CiteScore_Metrics_2011-2018_Download_Nov2019.csv", encoding='cp1252', dtype=str)
+scj = scj.fillna('')
+scj['Field'] = (scj['Scopus ASJC Code (Sub-subject Area)'].str[:2] + '**').map(d)
+rows = defaultdict(lambda:[])
+for row in scj.itertuples():
+    rows[getattr(row, 'Title').lower()].append((getattr(row, 'Quartile'), getattr(row, 'Field'), getattr(row, 'CiteScore')))
 
-'''
-Field mapping
-From the Scopus source list, I created column 'x2' by joining columns from
-'1000\General' to '3600\Health Professions' with '&.' I removed 'General' or
-replaced it with 'Natural Science' if the only entry was 'General' and NS was 
-an appropriate classification. The Scopus fields were mapped to EC, GI, NS, 
-or Other below.
-'''
-d = pd.read_csv('..\\Data\\fieldmapping.csv')[['Field','Mapping']].set_index('Field').to_dict()['Mapping']
-def get_disc(fields, d):
-    fields = [d.get(i, i) for i in fields]
-    if fields.count('NS') == len(fields): 
-        return 'NS'
-    elif fields.count('EC') == len(fields):
-        return 'EC'
-    elif 'EC' in fields:
-        return 'EC'
-    else:
-        return next(iter(Counter(fields)))
-    
-scopus_journals = pd.read_csv('journals_october_2019.csv', encoding='utf8', dtype=str)
-scopus_journals = scopus_journals[scopus_journals['Source Type'].isin(['Journal', 'Trade Journal'])]
-scopus_journals = scopus_journals[['Source Title (Medline-sourced journals are indicated in Green)', 'x2']]
-scopus_journals['fields_list'] = scopus_journals.x2.apply(lambda x: list(filter(None, x.split('&'))))
-scopus_journals['Field'] = scopus_journals.fields_list.apply(lambda x: get_disc(x, d))
-fields = dict(zip(scopus_journals['Source Title (Medline-sourced journals are indicated in Green)'].str.lower(), scopus_journals.Field))
+quartile, fields, citescore = {}, {}, {}
+for key, val in rows.items():
+    if len(set([pair[0] for pair in val])) == 1: # i.e. all same quartile
+        f = [pair[1] for pair in val]
+        if 'EC' in f:
+            quartile[key], fields[key], citescore[key] = val[f.index('EC')]
+        else:
+            quartile[key], fields[key], citescore[key] = val[f.index(next(iter(Counter(f))))]
+    else: # i.e. not all same quartile
+        quartile[key], fields[key], citescore[key] = val[0]
 fields['nature'] = 'GI'
 fields['science'] = 'GI'
 fields['proceedings of the national academy of sciences of the united states of america'] = 'GI'
+
+# mapping = {list(quartile)[i]:[quartile[list(quartile)[i]],
+#                               fields[list(quartile)[i]],
+#                               citescore[list(quartile)[i]]] for i in range(len(quartile))}
+# mappingdf = pd.DataFrame.from_dict(mapping, orient='index', columns=['Quartile', 'Field', 'CiteScore'])
+# mappingdf.to_csv('journalmapping.csv')

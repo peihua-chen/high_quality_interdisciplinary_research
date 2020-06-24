@@ -168,7 +168,7 @@ def pull_cited(data, output_file):
 
 def map_fields(df, cited=False, source_df=None):
     '''
-    Map field and quartile, and Source (original article Field), Cross/Intra, 
+    Map Field and Quartile, and Source (original article Field), Cross/Intra, 
     and Citation Type for cited-by articles.
     '''
     if not cited:
@@ -178,24 +178,27 @@ def map_fields(df, cited=False, source_df=None):
     else:
         eid_dict = dict(zip(source_df.eid, source_df.Field))
         df['Source'] = df['EID'].map(eid_dict)
+        eid_dict = dict(zip(source_df.eid, source_df.Quartile))
+        df["SourceQuartile"] = df["EID"].map(eid_dict)
         df['CrossIntra'] = df.apply(lambda row: 'Intra' if getattr(row, 'Source') == getattr(row, 'Field') else 'Cross', axis=1)
         df['CiteType'] = df.apply(lambda row: getattr(row, 'CrossIntra') + ' ' + getattr(row, 'Source'), axis=1)
     return df
 
-def clean_data(df, cited=False, source_df=None):
+def clean_data(df, dataset, cited=False, source_df=None):
     '''
     Drop duplicates based on eid, map field and quartile, and remove rows with 
     non-journal/trade journal aggregation type and unidentified field and 
     quartile
     '''
+    if not cited:
+        df = df.drop_duplicates('eid')
     df = map_fields(df)
-    if not cited: 
-        df.drop_duplicates('eid', inplace=True)
     df = df[(df.aggregation_type.isin(['Journal', 'Trade Journal'])) & \
                   (df.Field.isin(['NS', 'EC', 'Other', 'GI'])) & \
                   (df.Quartile.isin(['Quartile 1', 'Quartile 2', 'Quartile 3', 'Quartile 4']))]
     if cited:
         df = map_fields(df, cited, source_df)
+    df['Dataset'] = dataset
     return df
 
 
@@ -215,14 +218,14 @@ def main():
     Pull Scopus records for CNH-funded articles. Separate by pre-/post-start 
     date 01-01-2012.
     '''
-    pubs = pull_manual('NSF_CNH_Articles_manual.csv', 'Pubs_v1.csv')
-    post_CNH = pull_manual('NSF_CNH_Post-2011_Articles_manual.csv', 'Pubs_CNH_Post-2011.csv')
+    pubs = pull_manual('..\\Data\\NSF_CNH_Articles_manual.csv', 'Pubs_v1.csv')
+    post_CNH = pull_manual('..\\Data\\NSF_CNH_Post-2011_Articles_manual.csv', 'Pubs_CNH_Post-2011.csv')
     
     '''
     Pull comparator set and interdisciplinary cited-by articles after cleaning
     interdisciplinary set. Clean cited-by set.
     '''
-    pubs_clean = clean_data(pubs)
+    pubs_clean = clean_data(pubs, 'Interdisciplinary')
     pubs_clean['query'] = pubs_clean.apply(lambda row: format_query(row), axis=1)
     pubs_clean.to_csv('Pubs_Final.csv', index=False)
     print('Cleaned interdisciplinary set {} written to Pubs_Final.csv.'.format(len(pubs_clean) / len(pubs)))
@@ -231,9 +234,9 @@ def main():
     
     pubs_cited = pull_cited(pubs_clean, 'PubsCited_v1.csv')
     nrow = len(pubs_cited)
-    pubs_cited = clean_data(pubs_cited, cited=True, source_df=pubs_clean)
+    pubs_cited = clean_data(pubs_cited, 'Interdisciplinary', cited=True, source_df=pubs_clean)
     pubs_cited.to_csv('PubsCited_Final.csv', index=False)
-    print('Cleaned interdisciplinary set {} written to PubsCited_Final.csv.'.format(nrow / len(pubs_cited)))
+    print('Cleaned interdisciplinary set cited-by {} written to PubsCited_Final.csv.'.format(nrow / len(pubs_cited)))
     
     '''
     Sample interdisciplinary set and pulled cited-by articles after standard 
@@ -242,7 +245,7 @@ def main():
     initially sampled instead of sampling again here.
     '''
     nrow = len(comp)
-    comp = clean_data(comp)
+    comp = clean_data(comp, 'Comparator')
     comp = comp[comp['fund_sponsor'] != 'National Science Foundation']
     comp = comp.query("fund_acr != 'NSF' | fund_sponsor == 'National Sleep Foundation' | fund_sponsor == 'National Stroke Foundation'")
     cnh_auths = [item for sublist in list(pubs_clean['author_ids']) + list(post_CNH['author_ids']) for item in sublist]
@@ -256,20 +259,19 @@ def main():
     comp['remove'] = remove_indices
     comp = comp[~comp.remove]
     del comp['remove']
-    comp.Dataset = 'Comparator'
     comp.to_csv('Comp_Final.csv', index=False)
-    print('Comparator set {} written to Comp_Final.csv.'.format(nrow / len(comp)))
+    print('Cleaned comparator set {} written to Comp_Final.csv.'.format(nrow / len(comp)))
     
-    comp_sample = pd.read_csv('..\\Data\\' + 'CompSample.csv')
-    # Check that sample has correct ratio across field/quartile groups
+    comp_sample = pd.read_csv('..\\Data\\CompSample.csv')
     # comp_sample = comp_complete.groupby(['Field', 'Quartile']).apply(lambda x: x.sample(frac=0.13)).reset_index(drop=True)
+    # Check that sample has correct ratio across field/quartile groups
     # comp_sample['citation_count'] = pd.to_numeric(comp_sample.citation_count)
     # (comp_sample.groupby(['Field', 'Quartile']).count() / len(comp_sample)).scopus_id - (comp_complete.groupby(['Field', 'Quartile']).count() / len(comp_complete)).scopus_id
     comp_sample_cited = pull_cited(comp_sample, 'CompCited_Sample_v1.csv')
     nrow = len(comp_sample_cited)
-    comp_sample_cited = clean_data(comp_sample_cited, cited=True, source_df=comp_sample)
+    comp_sample_cited = clean_data(comp_sample_cited, 'Comparator', cited=True, source_df=comp_sample)
     comp_sample_cited.to_csv('CompCited_Sample_Final.csv', index=False)
-    print('Cleaned comparator set {} written to PubsCited_Final.csv.'.format(nrow / len(comp_sample_cited)))
+    print('Cleaned comparator set cited-by {} written to CompCited_Sample_Final.csv.'.format(nrow / len(comp_sample_cited)))
 
 try:
     main()

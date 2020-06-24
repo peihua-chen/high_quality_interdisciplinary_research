@@ -1,29 +1,28 @@
-﻿Abbrev,Field,Mapping
-AGRI,Agricultural and Biological Sciences,NS
-ARTS,Arts and Humanities,Other
-BIOC,"Biochemistry, Genetics and Molecular Biology",NS
-BUSI,"Business, Management and Accounting",EC
-CENG,Chemical Engineering,NS
-CHEM,Chemistry,NS
-COMP,Computer Science,Other
-DECI,Decision Sciences,Other
-DENT,Dentistry,Other
-EART,Earth and Planetary Sciences,NS
-ECON,"Economics, Econometrics and Finance",EC
-ENER,Energy,NS
-ENGI,Engineering,NS
-ENVI,Environmental Science,NS
-HEAL,Health Professions,NS
-IMMU,Immunology and Microbiology,NS
-MATE,Materials Science,NS
-MATH,Mathematics,Other
-MEDI,Medicine,NS
-NEUR,Neuroscience,NS
-NURS,Nursing,NS
-PHAR,"Pharmacology, Toxicology and Pharmaceutics",NS
-PHYS,Physics and Astronomy,NS
-PSYC,Psychology,Other
-SOCI,Social Sciences,Other
-VETE,Veterinary,NS
-MULT,Multidisciplinary,Other
-,Natural Science,NS
+﻿ASJC_Code,Abbrev,Field,Mapping
+10**,MULT,Multidisciplinary,Other
+11**,AGRI,Agricultural and Biological Sciences,NS
+12**,ARTS,Arts and Humanities,Other
+13**,BIOC,"Biochemistry, Genetics and Molecular Biology",NS
+14**,BUSI,"Business, Management and Accounting",EC
+15**,CENG,Chemical Engineering,NS
+16**,CHEM,Chemistry,NS
+17**,COMP,Computer Science,Other
+18**,DECI,Decision Sciences,Other
+19**,EART,Earth and Planetary Sciences,NS
+20**,ECON,"Economics, Econometrics and Finance",EC
+21**,ENER,Energy,NS
+22**,ENGI,Engineering,NS
+23**,ENVI,Environmental Science,NS
+24**,IMMU,Immunology and Microbiology,NS
+25**,MATE,Materials Science,NS
+26**,MATH,Mathematics,Other
+27**,MEDI,Medicine,NS
+28**,NEUR,Neuroscience,NS
+29**,NURS,Nursing,NS
+30**,PHAR,"Pharmacology, Toxicology and Pharmaceutics",NS
+31**,PHYS,Physics and Astronomy,NS
+32**,PSYC,Psychology,Other
+33**,SOCI,Social Sciences,Other
+34**,VETE,Veterinary,NS
+35**,DENT,Dentistry,Other
+36**,HEAL,Health Professions,NS
