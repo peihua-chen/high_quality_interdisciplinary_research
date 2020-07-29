@@ -304,11 +304,16 @@ ggplot(normed[normed$Quartile == "Quartile 1"], aes(x = std+1, color=Field)) +
 
 ## t-test means
 
-t-test mean # of citations from interdisciplinary and comparator datasets.
+t-test mean citation count from interdisciplinary and comparator datasets.
 ```{r}
-xP = pubs$citation_count
+xI = pubs$citation_count
 xC = comp_pubs$citation_count
-t.test(xP, xC, alternative = "greater")
+t.test(xI, xC, alternative = "greater")
+```
+
+t-test mean standardized citation count from interdisciplinary and comparator datasets.
+```{r}
+
 ```
 
 
