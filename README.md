@@ -1,5 +1,5 @@
-# Interdisciplinary Impact: Scripts and Data
-Last update: July 29, 2020
+# High Quality Interdisciplinary Research: Scripts and Data
+Last update: Februrary 25, 2020
 
 This repository contains all the data and code necessary to reproduce the data and results that drive the paper. The data collecting script (main.py) runs with files in the Data folder. Analysis is conducted and figures generated in Data_Analysis_v1.ipynb.
 
