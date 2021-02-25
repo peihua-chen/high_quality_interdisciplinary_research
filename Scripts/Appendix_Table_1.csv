@@ -24,10 +24,10 @@ Ecology Letters,NS,Quartile 1,19,110,17
 Landscape Ecology,NS,Quartile 1,18,105,17
 Boundary-Layer Meteorology,NS,Quartile 2-4,17,80,14
 Ecological Modelling,NS,Quartile 1,17,153,15
-Frontiers in Ecology and the Environment,NS,Quartile 1,17,30,16
 Climatic Change,NS,Quartile 1,16,138,16
 "Agriculture, Ecosystems and Environment",NS,Quartile 1,15,235,14
 Environmental Modelling and Software,NS,Quartile 1,15,157,13
+Frontiers in Ecology and the Environment,NS,Quartile 1,15,30,14
 Remote Sensing of Environment,NS,Quartile 1,15,304,13
 Soil Science Society of America Journal,NS,Quartile 2-4,15,343,15
 Ecological Economics,EC,Quartile 1,14,208,14
@@ -39,11 +39,11 @@ Agricultural and Forest Meteorology,NS,Quartile 1,13,142,13
 Atmospheric Chemistry and Physics,NS,Quartile 1,13,221,13
 Conservation Biology,NS,Quartile 1,12,189,11
 Oikos,NS,Quartile 1,12,133,12
-Ambio,NS,Quartile 1,11,85,10
 Environmental Management,NS,Quartile 1,11,123,11
 Geochimica et Cosmochimica Acta,NS,Quartile 1,11,126,11
 Geology,NS,Quartile 1,11,168,11
 New Phytologist,NS,Quartile 1,11,187,11
+Ambio,NS,Quartile 1,10,85,9
 Ecosphere,NS,Quartile 1,10,110,9
 Forest Ecology and Management,NS,Quartile 1,10,229,10
 Nature Geoscience,NS,Quartile 1,10,62,8
@@ -90,7 +90,6 @@ Environmental Microbiology,NS,Quartile 1,6,143,6
 Eos,NS,Quartile 2-4,6,16,6
 Journal of Biogeography,NS,Quartile 1,6,63,6
 Journal of Chemometrics,Other,Quartile 1,6,23,5
-Journal of Land Use Science,Other,Quartile 1,6,11,6
 Marine Chemistry,NS,Quartile 1,6,54,6
 Organic Geochemistry,NS,Quartile 2-4,6,44,6
 Plant and Soil,NS,Quartile 1,6,125,6
@@ -105,13 +104,13 @@ BMC Evolutionary Biology,NS,Quartile 1,5,325,3
 Canadian Journal of Forest Research,NS,Quartile 1,5,36,4
 Canadian Journal of Zoology,NS,Quartile 2-4,5,41,5
 Deep-Sea Research Part I: Oceanographic Research Papers,NS,Quartile 1,5,27,5
-Ecological Complexity,NS,Quartile 2-4,5,37,5
 Ecological Research,NS,Quartile 2-4,5,99,5
 Energy Policy,NS,Quartile 1,5,264,5
 Fisheries Research,NS,Quartile 2-4,5,65,4
 Freshwater Biology,NS,Quartile 1,5,49,5
 ICES Journal of Marine Science,NS,Quartile 1,5,99,5
 Journal of Environmental Quality,NS,Quartile 1,5,148,5
+Journal of Land Use Science,Other,Quartile 1,5,11,5
 Journal of Vegetation Science,NS,Quartile 1,5,49,5
 Land Use Policy,NS,Quartile 1,5,292,5
 Nature Communications,NS,Quartile 1,5,12689,4
@@ -127,6 +126,7 @@ Applied Geography,Other,Quartile 1,4,84,4
 Aquatic Microbial Ecology,NS,Quartile 1,4,26,4
 BMC Bioinformatics,NS,Quartile 1,4,826,2
 Current Anthropology,Other,Quartile 1,4,22,3
+Ecological Complexity,NS,Quartile 2-4,4,37,4
 Ecology and Evolution,NS,Quartile 1,4,87,4
 Environmental Pollution,NS,Quartile 1,4,63,4
 Environmental Toxicology and Chemistry,NS,Quartile 1,4,88,4
@@ -164,7 +164,6 @@ Chemical Geology,NS,Quartile 1,3,31,3
 Climate Research,NS,Quartile 1,3,19,3
 Conservation Letters,NS,Quartile 1,3,7,3
 Diversity and Distributions,NS,Quartile 1,3,28,3
-Earth Interactions,NS,Quartile 1,3,0,3
 EcoHealth,NS,Quartile 2-4,3,24,3
 Environment and Planning a,NS,Quartile 1,3,31,3
 Environmental Biology of Fishes,NS,Quartile 2-4,3,32,3
@@ -190,7 +189,6 @@ Journal of Marine Systems,NS,Quartile 1,3,35,3
 Journal of Research in Science Teaching,Other,Quartile 1,3,13,3
 Journal of Wildlife Management,NS,Quartile 2-4,3,98,3
 Journal of Zoology,NS,Quartile 1,3,27,3
-Limnology and Oceanography: Methods,NS,Quartile 1,3,2,3
 Molecular Biology and Evolution,NS,Quartile 1,3,55,3
 Molecular Ecology Resources,NS,Quartile 1,3,65,3
 Molecular Plant-Microbe Interactions,NS,Quartile 1,3,30,3
@@ -273,13 +271,13 @@ Journal of the Marine Biological Association of the United Kingdom,NS,Quartile 2
 Journal of the Royal Society Interface,NS,Quartile 1,2,55,2
 Land,NS,Quartile 2-4,2,21,2
 Land Economics,EC,Quartile 1,2,18,2
+Limnology and Oceanography: Methods,NS,Quartile 1,2,2,2
 Marine Geology,NS,Quartile 1,2,16,2
 Marine Resource Economics,EC,Quartile 1,2,9,2
 Materials and Structures/Materiaux et Constructions,NS,Quartile 1,2,21,2
 Methods in Ecology and Evolution,NS,Quartile 1,2,25,2
 Microbial Ecology,NS,Quartile 1,2,33,2
 Mitigation and Adaptation Strategies for Global Change,NS,Quartile 1,2,12,2
-Natural Computing,Other,Quartile 2-4,2,12,2
 Nomadic Peoples,Other,Quartile 2-4,2,12,2
 Nutrient Cycling in Agroecosystems,NS,Quartile 1,2,6,1
 Ocean Modelling,Other,Quartile 1,2,12,2
@@ -529,7 +527,6 @@ Journal of Zoological Systematics and Evolutionary Research,NS,Quartile 1,1,8,1
 Kew Bulletin,NS,Quartile 2-4,1,12,1
 Leisure Sciences,Other,Quartile 1,1,4,1
 Malaria Journal,NS,Quartile 1,1,426,1
-Malayan Nature Journal,NS,Quartile 2-4,1,0,1
 Marine and Coastal Fisheries,NS,Quartile 2-4,1,33,1
 Marine and Freshwater Research,NS,Quartile 2-4,1,10,1
 Marine Biology Research,NS,Quartile 2-4,1,4,1
@@ -543,8 +540,8 @@ Monthly Weather Review,NS,Quartile 1,1,18,1
 Mountain Research and Development,Other,Quartile 2-4,1,9,1
 Multiscale Modeling and Simulation,Other,Quartile 1,1,10,1
 Mycologia,NS,Quartile 1,1,13,1
+Natural Computing,Other,Quartile 2-4,1,12,1
 Natural Hazards Review,Other,Quartile 1,1,7,1
-Nature and Culture,Other,Quartile 2-4,1,0,1
 Nature Microbiology,NS,Quartile 1,1,33,1
 Nature Physics,NS,Quartile 1,1,17,1
 Nature Reviews Microbiology,NS,Quartile 1,1,5,1
@@ -567,7 +564,6 @@ Photochemical and Photobiological Sciences,NS,Quartile 2-4,1,5,1
 Physica A: Statistical Mechanics and Its Applications,NS,Quartile 1,1,21,1
 Phytocoenologia,NS,Quartile 2-4,1,8,1
 Plant Biotechnology Journal,NS,Quartile 1,1,12,1
-Plant Ecology and Diversity,NS,Quartile 2-4,1,0,1
 Plant Physiology,NS,Quartile 1,1,9,1
 Plant Physiology and Biochemistry,NS,Quartile 1,1,11,1
 "Plant, Cell and Environment",NS,Quartile 1,1,13,1
@@ -580,7 +576,6 @@ Precambrian Research,NS,Quartile 1,1,18,1
 "Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences",NS,Quartile 1,1,15,1
 Progress in Human Geography,Other,Quartile 1,1,7,1
 Progress in Physical Geography,NS,Quartile 1,1,6,1
-Progress in Planning,Other,Quartile 1,1,0,1
 PS - Political Science and Politics,Other,Quartile 2-4,1,14,1
 Quaestiones Geographicae,NS,Quartile 2-4,1,15,1
 Quarterly Journal of Political Science,Other,Quartile 1,1,3,1
